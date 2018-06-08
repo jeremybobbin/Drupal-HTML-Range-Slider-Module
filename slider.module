@@ -1,0 +1,174 @@
+<?php
+
+/**
+ * Implements hook_field_info()
+ */
+ function slider_field_info() {
+     return [
+         'slider' => [
+             'label' => t('Slider'),
+             'description' => t('This field stores a range and a label in the database.'),
+             'default_widget' => 'slider_widget',
+             'default_formatter' => 'slider_format',
+         ],
+     ];
+ }
+
+/**
+ * Implements hook_field_widget_info()
+ */
+ function slider_field_widget_info() {
+     return [
+         'slider_widget' => [
+             'label' => t('Slider Input Fields'),
+             'field types' => ['slider'],
+         ],
+     ];
+ }
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function slider_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+    
+    if($field['cardinality'] == 1) {
+        $element['#type'] = 'fieldset';
+    }
+
+    $element['min'] = [
+        '#type' => 'textfield',
+        '#field_prefix' => t('Min Value: '),
+        '#default_value' => isset($items[$delta]['min']) ? $items[$delta]['min'] : '',
+    ];
+
+    $element['max'] = [
+        '#type' => 'textfield',
+        '#field_prefix' => t('Max Value: '),
+        '#default_value' => isset($items[$delta]['max']) ? $items[$delta]['max'] : '',
+    ];
+
+    if (isset($instance['widget']['settings']['slider_label_text'])) {
+        $label = t(
+            '@label:',
+            ['@label' => $instance['widget']['settings']['slider_label_text']]
+        );
+    } else {
+        $label = t('Label: ');
+    }
+
+    $element['label'] = [
+        '#type' => 'textfield',
+        '#field_prefix' => $label,
+        '#default_value' => isset($items[$delta]['label']) ? $items[$delta]['label'] : '',
+    ];
+    return $element;
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function slider_field_is_empty($item, $field) {
+  if(empty($item['min']) || empty($item['min']) || empty($item['label'])) {
+      return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_field_validate().
+ */
+function slider_field_validate(&$entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+    dsm($items);
+    foreach($items as $delta => $item) {
+        
+    }
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function slider_field_widget_settings_form($field, $instance) {
+    $element['slider_label_text'] = [
+        '#type' => 'textfield',
+        '#title' => t('Alternate label text'),
+        '#description' => t('If an alternate label text is provided, it will be used in place of the default "Label" title for the label field.'),
+        '#default_value' => isset($instance['widget']['settings']['slider_label_text']) ? $instance['widget']['settings']['slider_label_text'] : '',
+    ];
+    return $element;
+}
+
+ /**
+  * Implements hook_field_formatter_info()
+  */
+  function slider_field_formatter_info() {
+    $info = [];
+    $info['slider_default'] = [
+            'label' => t('HTML Slider'),
+            'description' => t('This is a slider'),
+            'field types' => ['slider'],
+            'settings' => ['styles' => '_blank']
+    ];
+    return $info;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function slider_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, &$items, $display) {
+    dsm($instance);
+    dsm($items);
+    dsm($entity);
+    dsm($field);
+    dsm($display);
+    $element = [];
+    switch($display['type']) {
+        case 'slider_default':
+            foreach ($items as $key => $value) {
+                $element[$key] = [
+                    '#type' => 'markup',
+                    '#markup' =>
+                    '<div style="'
+                    . $display['settings']['styles']
+                    . '">'
+                    . '<input type="range" style="' 
+                        . '" min="'
+                        . check_plain($value['min'])
+                        . '" max="'
+                        . check_plain($value['max'])
+                        . '" value="'
+                        . check_plain($value['max'] - $value['min'])
+                        . '"></div>',
+                ];
+            }
+        break;
+    }
+    
+    return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function slider_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $output = t('Styles');
+  return $output;
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function slider_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+    $display = $instance['display'][$view_mode];
+    $settings = $display['settings'];
+    
+    $element = [];
+    if($display['type'] == 'slider_default') {
+        $element['styles'] = [
+            '#type' => 'textarea',
+            '#title' => t('Slider Styles'),
+            '#description' => 'This is going straight into the "style" attribute of the slider\'s wrapper div.',
+            '#default_value' => $settings['styles'],
+        ];
+    }
+    return $element;
+  }

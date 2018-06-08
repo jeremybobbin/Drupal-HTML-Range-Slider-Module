@@ -1,0 +1,4 @@
+name = Slider
+description = Provides a Feild API slider field that collects numberic information in the form of a slider.
+core = 7.x
+dependencies[] = field

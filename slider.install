@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * Implements hook_field_schema().
+ */
+function slider_field_schema($field) {
+    $columns = [
+        'label' => [
+            'type' => 'varchar',
+            'length' => 128,
+            'not null' => FALSE
+        ],
+        'min' => [
+            'type' => 'int',
+            'size' => 'small',
+            'not null' => TRUE
+        ],
+        'max' => [
+            'type' => 'int',
+            'size' => 'small',
+            'not null' => TRUE
+        ],
+
+  ];
+
+  $indexes = [
+      'label' => ['label'],
+  ];
+
+  return [
+      'columns' => $columns,
+      'indexes' => $indexes,
+  ];
+}
